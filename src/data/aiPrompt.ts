@@ -1,4 +1,5 @@
 import { parseCurrency } from "../utils/currency"
+import { calcMonthlySavings } from "../utils/simulation"
 import type { SimulationRecord } from "./simulation"
 
 const RESPONSE_SCHEMA = `{
@@ -24,9 +25,12 @@ const RESPONSE_SCHEMA = `{
 }`
 
 export function buildAIPrompt(simulation: SimulationRecord) {
-    const { income, expenses, debts, goalName, goalAmount, goalDeadline } = simulation
-    const monthlySavings = monthlySavings(simulation)
-    const monthlySavingsNeeded = parseCurrency(goalAmount) / parseInt(goalDeadline)
+    const { income, expenses, debts, goalName, goalAmount, goalDeadline } = 
+        simulation
+
+    const monthlySavings = calcMonthlySavings(simulation)
+    const monthlySavingsNeeded = 
+        parseCurrency(goalAmount) / parseInt(goalDeadline)
 
     return `Você é um educador financeiro especializado em finanças pessoais.
         Analise os dados abaixo e gere um diagnóstico financeiro personalizado com linguagem clara, didática e encorajadora,

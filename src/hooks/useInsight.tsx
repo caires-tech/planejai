@@ -1,15 +1,25 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { getInsight, type InsightData } from "../services/aiService"
 import { buildAIPrompt } from "../data/aiPrompt"
 import { useSimulationStorage } from "./useSimulationStorage"
-import { data } from "react-router-dom"
+import type { SimulationRecord } from "../data/simulation"
+
+
 
 export const useInsight = (id: string) => {
-    const [insight, setInsight] = useState<InsightData | null>(null)
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const isRequestPending = useRef(false)
+    const { getFormData, updateSimulation } = useSimulationStorage()
+    const [insight, setInsight] = useState<InsightData | null>(() => {
+        const simulation = getFormData(id)
 
-    const { getFormData } = useSimulationStorage()
+        if (simulation?.insight) {
+            return simulation.insight
+        }
+        return null
+    })
+
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>('Erro ao gerar o diagnóstico. Tente novamente')
 
     //Necessário o uso do useCallBack pois temos que colocar essa função
     //Como array de dependências do useEffect
@@ -22,6 +32,7 @@ export const useInsight = (id: string) => {
                 return
             }
 
+            isRequestPending.current = true
             setIsLoading(true)
             setError(null)
 
@@ -29,18 +40,24 @@ export const useInsight = (id: string) => {
                 const prompt = buildAIPrompt(simulation)
                 const data = await getInsight(prompt)
                 setInsight(data)
+
+                updateSimulation(simulationId, {
+                    ...simulation,
+                    insight: data,
+                } as SimulationRecord)
             } catch {
                 setError('Erro ao gerar o diagnóstico. Tente novamente')
             } finally {
+                isRequestPending.current = false
                 setIsLoading(false)
             }
         },
-        [getFormData],
+        [getFormData, updateSimulation],
     )
 
     useEffect(() => {
         // Evita loop infinito de requisições para a API do Gemini
-        if (!data) {
+        if (insight || isLoading || error || isRequestPending.current) {
             return
         }
 
