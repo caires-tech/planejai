@@ -10,6 +10,14 @@ import {
 import type { FormStepProps } from '../components/features/Simulation/FormStep'
 import type { InsightData } from '../services/aiService'
 
+// 1. Nova interface para as mensagens da conversa
+export interface ChatMessage {
+    id: string
+    sender: 'user' | 'ai'
+    text: string
+    timestamp: number
+}
+
 export const simulationFormSteps = [
     {
         id: 'income',
@@ -89,7 +97,9 @@ export type SimulationFormData = Record<
     string
 >
 
+// 2. Atualizado para aceitar 'messages' como campo opcional
 export type SimulationRecord = SimulationFormData & { 
     id: string
     insight?: InsightData
+    messages?: ChatMessage[]
 }
