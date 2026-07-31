@@ -13,33 +13,37 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
     console.log(insight)
 
     return (
-        <div className="bg-card order-2 rounded-2xl p-6 shadow-[4px_4px_18px_0px_rgba(0,0,0,0.2)] lg:order-1 lg:col-span-2">
-            <div className="mb-3 flex items-center gap-1.5">
+        <div className="bg-card order-2 flex h-full min-h-0 flex-col rounded-2xl p-6 shadow-[4px_4px_18px_0px_rgba(0,0,0,0.2)] lg:order-1 lg:col-span-2">
+            <div className="mb-3 flex shrink-0 items-center gap-1.5">
                 <span>✨</span>
                 <span className="text-primary text-xs font-semibold tracking-widest uppercase">
                     Insight Financeiro Personalizado
                 </span>
             </div>
-            {isLoading && (
-                <div className="flex">
-                    <Skeleton
-                        count={10}
-                        baseColor="var(--color-skeleton-base)"
-                        highlightColor="var(--color-skeleton-highlight)"
-                        className="mb-3 flex rounded-lg"
-                        containerClassName="flex-1"
-                        inline
+
+            {/* Container com scroll vertical para o conteúdo */}
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                {isLoading && (
+                    <div className="flex">
+                        <Skeleton
+                            count={10}
+                            baseColor="var(--color-skeleton-base)"
+                            highlightColor="var(--color-skeleton-highlight)"
+                            className="mb-3 flex rounded-lg"
+                            containerClassName="flex-1"
+                            inline
+                        />
+                    </div>
+                )}
+                {!isLoading && error && (
+                    <Error 
+                        simulationId={simulationId}
+                        message={error}
+                        onRetry={() => {fetchInsight(simulationId)}}
                     />
-                </div>
-            )}
-            {!isLoading && error && (
-                <Error 
-                    simulationId={simulationId}
-                    message={error}
-                    onRetry={() => {fetchInsight(simulationId)}}
-                />
-            )}
-            {!isLoading && insight && !error && <Content insight={insight} />}
+                )}
+                {!isLoading && insight && !error && <Content insight={insight} />}
+            </div>
         </div>
     )
 }

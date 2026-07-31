@@ -34,10 +34,34 @@ export const useSimulationStorage = () => {
 
         const updated = savedData.map((record) => 
             record.id === id ? { ...data } : record,
-    )
+        )
 
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated))
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated))
     }
 
-    return { saveFormData, getFormData, updateSimulation }
+    // 👇 Novas funções para a tela de Histórico
+    const getAllSimulations = (): SimulationRecord[] => {
+        const storage = localStorage.getItem(LOCAL_STORAGE_KEY)
+        if (!storage) return []
+        return JSON.parse(storage) as SimulationRecord[]
+    }
+
+    const deleteSimulation = (id: string): SimulationRecord[] => {
+        const storage = localStorage.getItem(LOCAL_STORAGE_KEY)
+        if (!storage) return []
+
+        const savedData = JSON.parse(storage) as SimulationRecord[]
+        const updated = savedData.filter((record) => record.id !== id)
+
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated))
+        return updated
+    }
+
+    return { 
+        saveFormData, 
+        getFormData, 
+        updateSimulation, 
+        getAllSimulations, 
+        deleteSimulation 
+    }
 }

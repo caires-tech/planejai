@@ -4,65 +4,88 @@ import { buildAIPrompt } from "../data/aiPrompt"
 import { useSimulationStorage } from "./useSimulationStorage"
 import type { SimulationRecord } from "../data/simulation"
 
-
-
 export const useInsight = (id: string) => {
-    const isRequestPending = useRef(false)
-    const { getFormData, updateSimulation } = useSimulationStorage()
-    const [insight, setInsight] = useState<InsightData | null>(() => {
-        const simulation = getFormData(id)
+  const { getFormData, updateSimulation } = useSimulationStorage()
 
-        if (simulation?.insight) {
-            return simulation.insight
-        }
-        return null
-    })
+  // Guarda o ID da simulação que já teve a busca disparada/carregada
+  const fetchedIdRef = useRef<string | null>(null)
 
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>('Erro ao gerar o diagnóstico. Tente novamente')
+  // Inicializa com o cache local se já existir
+  const [insight, setInsight] = useState<InsightData | null>(() => {
+    if (!id) return null
+    const simulation = getFormData(id)
+    return simulation?.insight ?? null
+  })
 
-    //Necessário o uso do useCallBack pois temos que colocar essa função
-    //Como array de dependências do useEffect
-    const fetchInsight = useCallback(
-        async (simulationId: string) => {
-            const simulation = getFormData(simulationId)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
 
-            if (!simulation) {
-                setError('Simulação não encontrada.')
-                return
-            }
+  const fetchInsight = useCallback(
+    async (simulationId: string) => {
+      if (!simulationId) return
 
-            isRequestPending.current = true
-            setIsLoading(true)
-            setError(null)
+      const simulation = getFormData(simulationId)
 
-            try {
-                const prompt = buildAIPrompt(simulation)
-                const data = await getInsight(prompt)
-                setInsight(data)
+      if (!simulation) {
+        setError('Simulação não encontrada.')
+        return
+      }
 
-                updateSimulation(simulationId, {
-                    ...simulation,
-                    insight: data,
-                } as SimulationRecord)
-            } catch {
-                setError('Erro ao gerar o diagnóstico. Tente novamente')
-            } finally {
-                isRequestPending.current = false
-                setIsLoading(false)
-            }
-        },
-        [getFormData, updateSimulation],
-    )
+      // Se já possui o insight em cache no localStorage
+      if (simulation.insight) {
+        setInsight(simulation.insight)
+        setError(null)
+        return
+      }
 
-    useEffect(() => {
-        // Evita loop infinito de requisições para a API do Gemini
-        if (insight || isLoading || error || isRequestPending.current) {
-            return
-        }
+      // MARCAÇÃO IMEDIATA: Bloqueia qualquer chamada paralela com o mesmo ID
+      fetchedIdRef.current = simulationId
 
-        fetchInsight(id)
-    }, [id, insight, isLoading, fetchInsight])
+      setIsLoading(true)
+      setError(null)
 
-    return { insight, isLoading, error, fetchInsight }
+      try {
+        const prompt = buildAIPrompt(simulation)
+        const data = await getInsight(prompt)
+        
+        setInsight(data)
+        setError(null)
+
+        updateSimulation(simulationId, {
+          ...simulation,
+          insight: data,
+        } as SimulationRecord)
+      } catch (err) {
+        console.error('Erro na requisição da IA:', err)
+        // Em caso de erro, permite que o usuário possa tentar novamente via botão
+        fetchedIdRef.current = null 
+        setError('Erro ao gerar o diagnóstico. Tente novamente')
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [getFormData, updateSimulation],
+  )
+
+  useEffect(() => {
+    // 1. Se não tiver ID válido, encerra
+    if (!id) return
+
+    // 2. Se o ID mudou na navegação, atualiza o estado local do insight com o novo cache
+    const currentSimulation = getFormData(id)
+    if (currentSimulation?.insight) {
+      setInsight(currentSimulation.insight)
+      setError(null)
+      return
+    }
+
+    // 3. Se já temos o insight, se está carregando ou se este ID JÁ foi enviado/disparado, Bloqueia!
+    if (insight || isLoading || error || fetchedIdRef.current === id) {
+      return
+    }
+
+    void fetchInsight(id)
+  }, [id, insight, isLoading, error, fetchInsight, getFormData])
+
+  return { insight, isLoading, error, fetchInsight }
 }
