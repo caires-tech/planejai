@@ -28,7 +28,7 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
 const genAI = new GoogleGenerativeAI(API_KEY)
 
 // Modelo estável e suportado pelo SDK
-const MODEL_NAME = 'gemini-flash-latest'
+const MODEL_NAME = 'gemini-2.0-flash'
 
 export const getInsight = async (prompt: string): Promise<InsightData> => {
     const model = genAI.getGenerativeModel({ 

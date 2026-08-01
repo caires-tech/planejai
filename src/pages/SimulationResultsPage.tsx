@@ -60,7 +60,7 @@ export function SimulationResultsPage() {
         <AIInsightsCard key={data.id} simulationId={data.id} />
 
         {/* Coluna da Direita */}
-        <div className="order-1 flex flex-col gap-6 lg:order-2">
+        <div className="order-1 flex flex-col gap-8 lg:order-2">
           <Card
             icon={Wallet}
             label="Renda mensal"
