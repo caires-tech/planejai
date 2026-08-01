@@ -23,16 +23,13 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
     } = useInsight(simulationId)
 
     const [inputText, setInputText] = useState("")
-    const scrollContainerRef = useRef<HTMLDivElement>(null)
+    
+    // Ref específica para o ponto final da conversa (ancoragem do auto-scroll)
+    const messagesEndRef = useRef<HTMLDivElement>(null)
 
-    // Auto-scroll sempre que a lista de mensagens ou o estado de envio mudar
+    // Auto-scroll sempre que entrar nova mensagem ou o status de envio mudar
     useEffect(() => {
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollTo({
-                top: scrollContainerRef.current.scrollHeight,
-                behavior: 'smooth',
-            })
-        }
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages, isSendingMessage])
 
     const handleSend = async (e: React.FormEvent) => {
@@ -45,7 +42,10 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
     }
 
     return (
-        <div className="bg-card order-2 flex h-full min-h-0 flex-col rounded-2xl p-6 shadow-[4px_4px_18px_0px_rgba(0,0,0,0.2)] lg:order-1 lg:col-span-2">
+        /* AQUI ESTÁ O SEGREDO: max-h-[460px] impede o card de esticar */
+        <div className="bg-card order-2 flex h-full max-h-[460px] flex-col justify-between rounded-2xl p-6 shadow-[4px_4px_18px_0px_rgba(0,0,0,0.2)] lg:order-1 lg:col-span-2">
+            
+            {/* Cabeçalho Fixo */}
             <div className="mb-3 flex shrink-0 items-center gap-1.5">
                 <span>✨</span>
                 <span className="text-primary text-xs font-semibold tracking-widest uppercase">
@@ -53,11 +53,8 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
                 </span>
             </div>
 
-            {/* Container com scroll vertical para o conteúdo e chat */}
-            <div 
-                ref={scrollContainerRef}
-                className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-6"
-            >
+            {/* Container ÚNICO com scroll vertical para Conteúdo + Conversa */}
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-6 min-h-0">
                 {isLoading && (
                     <div className="flex">
                         <Skeleton
@@ -70,18 +67,21 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
                         />
                     </div>
                 )}
+
                 {!isLoading && error && (
                     <Error 
                         simulationId={simulationId}
                         message={error}
-                        onRetry={() => {fetchInsight()}}
+                        onRetry={() => { fetchInsight() }}
                     />
                 )}
+
                 {!isLoading && insight && !error && (
                     <>
+                        {/* Conteúdo do Insight */}
                         <Content insight={insight} />
 
-                        {/* Histórico de Conversas com o Educador */}
+                        {/* Histórico de Conversas com a IA */}
                         {messages.length > 0 && (
                             <div className="pt-4 border-t border-white/10 space-y-6">
                                 {messages.map((msg) => (
@@ -90,8 +90,8 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
                                             <MessageSquare className="w-4 h-4 text-primary" />
                                             <span>{msg.sender === 'user' ? 'Você' : 'Resposta da IA'}</span>
                                         </div>
-                                        <p className="text-sm text-gray-300 leading-relaxed pl-6">
-                                            {msg.text}
+                                        <p className="text-sm text-gray-300 leading-relaxed pl-6 text-justify">
+                                            {msg.text.replaceAll('**', '')}
                                         </p>
                                     </div>
                                 ))}
@@ -109,11 +109,14 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
                         {chatError && (
                             <p className="text-xs text-red-400 pl-6">{chatError}</p>
                         )}
+
+                        {/* Âncora invisível para o Auto-Scroll apontar */}
+                        <div ref={messagesEndRef} />
                     </>
                 )}
             </div>
 
-            {/* Input fixo na parte inferior para novas perguntas */}
+            {/* Input fixo na parte inferior */}
             {!isLoading && insight && !error && (
                 <form onSubmit={handleSend} className="mt-4 pt-3 border-t border-white/10 flex items-center gap-2 shrink-0">
                     <input

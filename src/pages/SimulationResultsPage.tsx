@@ -23,12 +23,13 @@ export function SimulationResultsPage() {
   const monthlySavings = calcMonthlySavings(data)
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+    <main key={data.id} className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
       <PageHero
         title="Resultado da sua simulação"
         subtitle="Com base no seu perfil financeiro e objetivos"
       />
 
+      {/* Grid Superior */}
       <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card
           icon={Goal}
@@ -54,10 +55,11 @@ export function SimulationResultsPage() {
         />
       </div>
 
+      {/* Grid Inferior - Sem items-stretch */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Componente isolado que lida com o Insight */}
-        <AIInsightsCard simulationId={data.id} />
+        <AIInsightsCard key={data.id} simulationId={data.id} />
 
+        {/* Coluna da Direita */}
         <div className="order-1 flex flex-col gap-6 lg:order-2">
           <Card
             icon={Wallet}

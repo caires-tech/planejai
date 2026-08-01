@@ -27,14 +27,14 @@ export function Header() {
                     <Button
                         variant="secondary"
                         icon={TrendingUp}
-                        onClick={() => void navigate('/')}
+                        onClick={() => navigate('/')}
                     >
                         <span className="hidden sm:inline">Nova Simulação</span>
                     </Button>
                     <Button
                         variant="ghost"
                         icon={Clock}
-                        onClick={() => void navigate('/historico')}
+                        onClick={() => navigate('/historico')}
                     >
                         <span className="hidden sm:inline">Histórico</span>
                     </Button>

@@ -52,8 +52,8 @@ export const sendChatMessage = async (
         : 'Nenhuma pergunta anterior.'
 
     const prompt = `
-Você é um Educador Financeiro consultivo, amigável e direto.
-Responda de forma clara e prática às dúvidas do usuário sobre o planejamento financeiro dele.
+Você é um Educador Financeiro consultivo, amigável e extremamente direto.
+Responda às dúvidas do usuário sobre o planejamento financeiro dele de forma clara, sucinta e objetiva.
 
 DADOS DA SIMULAÇÃO DO USUÁRIO:
 - Objetivo: ${simulation.goalName}
@@ -69,9 +69,12 @@ ${historyText}
 NOVA PERGUNTA DO USUÁRIO:
 ${newMessage}
 
-INSTRUÇÕES:
-- Responda diretamente em texto simples.
-- Mantenha um tom encorajador e focado em soluções financeiras realistas.
+INSTRUÇÕES OBRIGATÓRIAS:
+- NUNCA use formatação Markdown (como **, *, # ou listas numeradas). Escreva estritamente em texto puro (plain text).
+- Seja extremamente conciso, sucinto e direto ao ponto.
+- Limite sua resposta a no máximo 4 ou 5 parágrafos curtos.
+- Evite saudações longas ou explicações extensas, focando nos cálculos e na solução prática.
+- Mantenha um tom encorajador e realista.
 `
 
     const model = genAI.getGenerativeModel({ model: MODEL_NAME })

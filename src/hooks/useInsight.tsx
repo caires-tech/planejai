@@ -7,6 +7,9 @@ import type { ChatMessage, SimulationRecord } from "../data/simulation"
 export const useInsight = (id: string) => {
   const { getFormData, updateSimulation } = useSimulationStorage()
 
+  // Ref para verificar se o componente ainda está montado na tela
+  const isMountedRef = useRef<boolean>(true)
+
   // Trava rígida: armazena qual ID já teve tentativa de disparo nesta sessão
   const fetchedIdRef = useRef<string | null>(null)
   const isFetchingRef = useRef<boolean>(false)
@@ -34,7 +37,6 @@ export const useInsight = (id: string) => {
     async (simulationId: string, forceRetry = false) => {
       if (!simulationId) return
 
-      // Se já está buscando ou se já tentou disparar esse ID (e não é uma tentativa manual via botão)
       if (isFetchingRef.current || (!forceRetry && fetchedIdRef.current === simulationId)) {
         return
       }
@@ -42,31 +44,36 @@ export const useInsight = (id: string) => {
       const simulation = getFormData(simulationId)
 
       if (!simulation) {
-        setError('Simulação não encontrada.')
+        if (isMountedRef.current) setError('Simulação não encontrada.')
         return
       }
 
-      // Se já possui o insight em cache no localStorage
       if (simulation.insight && !forceRetry) {
-        setInsight(simulation.insight)
-        setMessages(simulation.messages ?? [])
-        setError(null)
+        if (isMountedRef.current) {
+          setInsight(simulation.insight)
+          setMessages(simulation.messages ?? [])
+          setError(null)
+        }
         return
       }
 
-      // REGISTRA A TRAVA ANTES DE EXECUTAR
       isFetchingRef.current = true
       fetchedIdRef.current = simulationId
 
-      setIsLoading(true)
-      setError(null)
+      if (isMountedRef.current) {
+        setIsLoading(true)
+        setError(null)
+      }
 
       try {
         const prompt = buildAIPrompt(simulation)
         const data = await getInsight(prompt)
 
-        setInsight(data)
-        setError(null)
+        // SÓ ATUALIZA O ESTADO SE O COMPONENTE AINDA ESTIVER MONTADO
+        if (isMountedRef.current) {
+          setInsight(data)
+          setError(null)
+        }
 
         updateSimulation(simulationId, {
           ...simulation,
@@ -74,17 +81,19 @@ export const useInsight = (id: string) => {
         } as SimulationRecord)
       } catch (err) {
         console.error('Erro na requisição da IA:', err)
-        setError('Erro ao gerar o diagnóstico. Tente novamente')
-        // Mantemos fetchedIdRef.current marcado com o ID para IMPEDIR que o useEffect tente de novo automaticamente
+        if (isMountedRef.current) {
+          setError('Erro ao gerar o diagnóstico. Tente novamente')
+        }
       } finally {
-        setIsLoading(false)
+        if (isMountedRef.current) {
+          setIsLoading(false)
+        }
         isFetchingRef.current = false
       }
     },
     [getFormData, updateSimulation],
   )
 
-  // Função para enviar uma nova pergunta do usuário no chat
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim() || isSendingMessage || !id) return
@@ -116,7 +125,10 @@ export const useInsight = (id: string) => {
         }
 
         const finalMessages = [...updatedMessagesWithUser, aiMessage]
-        setMessages(finalMessages)
+
+        if (isMountedRef.current) {
+          setMessages(finalMessages)
+        }
 
         updateSimulation(id, {
           ...simulation,
@@ -124,34 +136,40 @@ export const useInsight = (id: string) => {
         } as SimulationRecord)
       } catch (err) {
         console.error('Erro ao enviar mensagem:', err)
-        setChatError('Erro ao obter resposta da IA. Tente novamente.')
+        if (isMountedRef.current) {
+          setChatError('Erro ao obter resposta da IA. Tente novamente.')
+        }
       } finally {
-        setIsSendingMessage(false)
+        if (isMountedRef.current) {
+          setIsSendingMessage(false)
+        }
       }
     },
     [getFormData, id, isSendingMessage, messages, updateSimulation],
   )
 
+  // 1. O useEffect deve reagir APENAS quando o 'id' mudar na URL
   useEffect(() => {
+    isMountedRef.current = true
+
     if (!id) return
 
     const currentSimulation = getFormData(id)
 
-    // 1. Se já tem insight salvo, carrega do cache
     if (currentSimulation?.insight) {
       setInsight(currentSimulation.insight)
       setMessages(currentSimulation.messages ?? [])
       setError(null)
-      return
-    }
-
-    // 2. Só dispara o fetch se AINDA NÃO tentou esse ID nesta sessão
-    if (fetchedIdRef.current !== id) {
+    } else if (fetchedIdRef.current !== id) {
       void fetchInsight(id)
     }
-  }, [id, fetchInsight, getFormData])
 
-  // Função exportada para quando o usuário clicar manualmente no botão "Tentar novamente"
+    return () => {
+      isMountedRef.current = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]) // Dependência RÍGIDA APENAS em 'id'
+
   const retryFetch = useCallback(() => {
     if (id) {
       void fetchInsight(id, true)
@@ -165,7 +183,7 @@ export const useInsight = (id: string) => {
     isSendingMessage,
     error,
     chatError,
-    fetchInsight: retryFetch, // Repassa a função de retry forçado para o botão
+    fetchInsight: retryFetch,
     sendMessage,
   }
 }
