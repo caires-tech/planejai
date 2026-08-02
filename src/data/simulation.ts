@@ -1,3 +1,7 @@
+/**
+ * Definições de tipos, interfaces e configurações do fluxo de simulação.
+ * Contém o mapeamento de etapas do formulário, estrutura das mensagens do chat e tipos do histórico.
+ */
 import {
     CalendarClock,
     CreditCard,
@@ -10,7 +14,13 @@ import {
 import type { FormStepProps } from '../components/features/Simulation/FormStep'
 import type { InsightData } from '../services/aiService'
 
-// 1. Nova interface para as mensagens da conversa
+/**
+ * Representa uma mensagem individual trocada no chat de insights.
+ * id: Identificador único da mensagem.
+ * sender: Identifica a origem da mensagem ('user' para usuário ou 'ai' para o assistente).
+ * text: Conteúdo em texto da mensagem.
+ * timestamp: Data/hora do envio em formato Unix timestamp.
+ */
 export interface ChatMessage {
     id: string
     sender: 'user' | 'ai'
@@ -18,6 +28,10 @@ export interface ChatMessage {
     timestamp: number
 }
 
+/**
+ * Configuração estática de todas as etapas do formulário de simulação financeira.
+ * Define os ícones, rótulos, perguntas e configurações de input para cada passo.
+ */
 export const simulationFormSteps = [
     {
         id: 'income',
@@ -92,12 +106,18 @@ export const simulationFormSteps = [
     },
 ] satisfies FormStepProps[]
 
+/**
+ * Mapeamento dinâmico dos dados do formulário baseados nos IDs das etapas.
+ */
 export type SimulationFormData = Record<
     (typeof simulationFormSteps)[number]['id'], 
     string
 >
 
-// 2. Atualizado para aceitar 'messages' como campo opcional
+/**
+ * Estrutura completa de um registro de simulação salvo no histórico.
+ * Inclui os dados informados no formulário, o ID gerado, o insight da IA e as mensagens do chat.
+ */
 export type SimulationRecord = SimulationFormData & { 
     id: string
     insight?: InsightData

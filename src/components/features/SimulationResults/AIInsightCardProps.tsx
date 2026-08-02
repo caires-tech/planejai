@@ -1,3 +1,8 @@
+/**
+ * Card principal da interface de resultados. 
+ * Responsável por gerenciar o estado visual (carregamento/Skeleton, erro, conteúdo),
+ * renderizar o relatório do diagnóstico gerado e prover a interface de chat em tempo real com a IA.
+ */
 import { useState, useRef, useEffect } from "react"
 import Skeleton from "react-loading-skeleton"
 import { MessageSquare, Send } from "lucide-react"
@@ -6,10 +11,17 @@ import { Content } from "../insights/Content"
 import { Error } from "../insights/Error"
 import 'react-loading-skeleton/dist/skeleton.css'
 
+/**
+ * Propriedades aceitas pelo componente AIInsightsCard.
+ * simulationId: Identificador único da simulação financeira atual.
+ */
 interface AIInsightCardProps {
     simulationId: string
 }
 
+/**
+ * Componente container que integra os dados de IA, controle de chat e controle de scroll automático.
+ */
 export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
     const { 
         insight, 
@@ -27,6 +39,7 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
+    // Rola a conversa até a mensagem mais recente e restaura o foco do input após a resposta da IA
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
         
@@ -35,6 +48,10 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
         }
     }, [messages, isSendingMessage])
 
+    /**
+     * Trata o envio de uma nova pergunta no chat.
+     * Limpa o campo de entrada e invoca o hook para comunicação com o modelo LLM.
+     */
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!inputText.trim() || isSendingMessage) return
@@ -47,6 +64,9 @@ export function AIInsightsCard({ simulationId }: AIInsightCardProps) {
     return (
         <div className="bg-card order-2 flex h-full max-h-[480px] flex-col justify-between rounded-2xl p-6 shadow-[4px_4px_18px_0px_rgba(0,0,0,0.2)] lg:order-1 lg:col-span-2">
             
+            // ==========================================
+            // RENDERIZAÇÃO DE ESTADOS (Loading, Erro, Conteúdo & Chat)
+            // ==========================================
             {/* Cabeçalho Fixo */}
             <div className="mb-3 flex shrink-0 items-center gap-1.5">
                 <span>✨</span>

@@ -1,9 +1,16 @@
+/**
+ * Componente que renderiza cada passo individual do formulário multi-etapas.
+ * Gerencia a entrada de dados do usuário, formatação de valores monetários e botões de navegação.
+ */
 import { ArrowLeft, ArrowRight, type LucideIcon } from 'lucide-react'
 import { Input, type InputProps } from '../../shared/Input'
 import { Button } from '../../shared/Button'
 import { useState, type SyntheticEvent } from 'react'
 import { formatCurrencyMask } from '../../../utils/currency'
 
+/**
+ * Propriedades relativas ao conteúdo e campos da etapa do formulário.
+ */
 export interface FormStepProps {
     id: string
     icon: LucideIcon
@@ -16,15 +23,25 @@ export interface FormStepProps {
     }
 }
 
+/**
+ * Propriedades relativas aos botões de ação e navegação entre passos.
+ */
 interface ActionButtonProps {
     onBack: () => void
     onNext: (value: string) => void
     hideBackButton?: boolean
 }
 
+/**
+ * Renderiza um card contendo a pergunta da etapa atual, o campo de input e os botões de ação.
+ */
 export function FormStep({ icon: Icon, title, question, inputProps, submitButtonProps, hideBackButton, onBack, onNext }: FormStepProps & ActionButtonProps) {
     const [inputValue, setInputValue] = useState('')
     
+    /**
+     * Trata o envio do formulário da etapa.
+     * Impede a atualização da página e aciona o callback de avanço caso o campo não esteja vazio.
+     */
     const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault()
 

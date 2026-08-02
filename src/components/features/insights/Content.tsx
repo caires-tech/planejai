@@ -1,16 +1,33 @@
+/**
+ * Componente encarregado de renderizar visualmente os dados do diagnóstico 
+ * retornado pela IA (viabilidade, diagnóstico, sugestões, investimentos e motivação).
+ */
 import type { PropsWithChildren } from "react"
 import type { InsightData } from "../../../services/aiService"
 
+/**
+ * Propriedades aceitas pelo componente Content.
+ */
 interface ContentProps {
     insight: InsightData
 }
 
+// ==========================================
+// SUBCOMPONENTES AUXILIARES DE ESTILIZAÇÃO
+// ==========================================
+
+/**
+ * Parágrafo padrão padronizado com estilos de tipografia e espaçamento.
+ */
 function Paragraph({ children }: PropsWithChildren) {
     return (
         <p className="text-muted-foreground text-sm leading-relaxed">{children}</p>
     )
 }
 
+/**
+ * Título de seção com formatação de texto e margens pré-definidas.
+ */
 function SectionTitle({ children }: PropsWithChildren) {
     return (
         <h3 className="text-foreground mt-5 mb-1.5 text-sm leading-relaxed font-semibold">
@@ -19,6 +36,9 @@ function SectionTitle({ children }: PropsWithChildren) {
     )
 }
 
+/**
+ * Lista ordenada (1, 2, 3...) para exibição dos itens de sugestões e recomendações.
+ */
 function OrderedList({ items}: { items: string[] }) {
     return (
         <ol className="text-muted-foreground ml-6 list-decimal text-sm leading-relaxed">
@@ -31,6 +51,9 @@ function OrderedList({ items}: { items: string[] }) {
     )
 }
 
+/**
+ * Mapeamento de estilos visuais (badges/tags) de acordo com a viabilidade calculada pela IA.
+ */
 const statusStyles = {
     viable: {
         label: 'Meta viável no prazo',
@@ -49,6 +72,9 @@ const statusStyles = {
     },
 }
 
+/**
+ * Componente principal que organiza a exibição modular dos insights da IA em seções visuais.
+ */
 export function Content({ insight }: ContentProps) {
     const status = statusStyles[insight.feasibility.status] ?? null
 

@@ -1,6 +1,14 @@
+/**
+ * Módulo de integração com a API do Google Gemini (Google Generative AI).
+ * Responsável por obter diagnósticos financeiros estruturados em JSON e gerenciar
+ * as interações do chat conversacional com o Educador Financeiro.
+ */
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { ChatMessage, SimulationRecord } from '../data/simulation'
 
+/**
+ * Interface que representa a estrutura do diagnóstico (insight) retornado pela IA.
+ */
 export interface InsightData {
     feasibility: {
         status: 'viable' | 'needs_adjustment' | 'unfeasible'
@@ -27,8 +35,8 @@ export interface InsightData {
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
 const genAI = new GoogleGenerativeAI(API_KEY)
 
-// Modelo estável e suportado pelo SDK
-const MODEL_NAME = 'gemini-2.0-flash'
+// Modelo da IA suportado pela API Key
+const MODEL_NAME = 'gemini-flash-latest'
 
 export const getInsight = async (prompt: string): Promise<InsightData> => {
     const model = genAI.getGenerativeModel({ 
@@ -42,6 +50,14 @@ export const getInsight = async (prompt: string): Promise<InsightData> => {
     return JSON.parse(responseText) as InsightData
 }
 
+/**
+ * Envia uma mensagem do usuário para o assistente virtual de educação financeira.
+ * Mantém o contexto incluindo os dados da simulação e o histórico recente da conversa.
+ * simulation: Registro com os dados financeiros do usuário.
+ * history: Histórico prévio de mensagens da conversa.
+ * newMessage: Nova mensagem/dúvida enviada pelo usuário.
+ * Resposta: em texto puro gerada pelo assistente.
+ */
 export const sendChatMessage = async (
     simulation: SimulationRecord,
     history: ChatMessage[],

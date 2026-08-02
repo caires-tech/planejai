@@ -1,13 +1,21 @@
+/**
+ * Página de visualização detalhada dos resultados de uma simulação específica.
+ * Recupera os dados da simulação via parâmetro de URL (`id`), exibe os cartões de métricas
+ * (custo da meta, prazo, renda, custos e dívidas) e inclui o diagnóstico inteligente de IA (AIInsightsCard).
+ */
 import { CalendarClock, CreditCardIcon, Goal, Landmark, PiggyBank, Wallet } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-
 import { AIInsightsCard } from '../components/features/SimulationResults/AIInsightCardProps'
 import { Card } from '../components/features/SimulationResults/Card'
 import { PageHero } from '../components/shared/PageHero'
 import { useSimulationStorage } from '../hooks/useSimulationStorage'
 import { calcMonthlySavings } from '../utils/simulation'
 
+/**
+ * Renderiza o painel completo de resultados e métricas da simulação selecionada.
+ */
 export function SimulationResultsPage() {
+  // Obtém o parâmetro 'id' da rota e busca a simulação correspondente no LocalStorage
   const { id } = useParams<{ id: string }>()
   const { getFormData } = useSimulationStorage()
   const data = id ? getFormData(id) : null
@@ -19,7 +27,7 @@ export function SimulationResultsPage() {
       </main>
     )
   }
-
+  // Calcula a economia mensal estimada com base nos dados financeiros informados
   const monthlySavings = calcMonthlySavings(data)
 
   return (
@@ -28,7 +36,7 @@ export function SimulationResultsPage() {
         title="Resultado da sua simulação"
         subtitle="Com base no seu perfil financeiro e objetivos"
       />
-
+      {/* Resumo visual das métricas principais da meta e economia calculada */}
       {/* Grid Superior */}
       <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card
@@ -54,7 +62,7 @@ export function SimulationResultsPage() {
           subtitle="Economia mensal necessária"
         />
       </div>
-
+      {/* Painel detalhado: cartão de diagnósticos de IA e visão detalhada das finanças (renda, gastos, dívidas) */}
       {/* Grid Inferior - Sem items-stretch */}
       <div className="grid gap-6 lg:grid-cols-3">
         <AIInsightsCard key={data.id} simulationId={data.id} />

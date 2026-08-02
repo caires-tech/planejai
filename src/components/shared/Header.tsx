@@ -1,13 +1,21 @@
+/**
+ * Componente do cabeçalho de navegação principal da aplicação.
+ * Exibe a marca Planej.ai, atalhos para nova simulação e histórico,
+ * além do alternador de tema claro/escuro (Dark Mode).
+ */
 import { Clock, Moon, Sun, TrendingUp, Wallet } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from './Button'
 import { Divider } from './Divider'
 import { useTheme } from '../../hooks/useTheme'
 
+/**
+ * Renderiza a barra superior de navegação global com suporte a responsividade e alternância de temas.
+ */
 export function Header() {
     const navigate = useNavigate()
     const { theme, toggleTheme } = useTheme()
-
+    // Hooks para navegação de rotas e alternância do tema global (Light/Dark)
     return (
         <header className="border-b border-(--border) px-6 py-3">
             <nav className="flex items-center justify-between">

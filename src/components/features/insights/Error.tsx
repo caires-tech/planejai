@@ -1,12 +1,25 @@
+/**
+ * Componente de UI para exibição de mensagens de erro durante a requisição da IA.
+ * Fornece feedback visual ao usuário e um botão para tentar a requisição novamente.
+ */
 import { RefreshCw } from "lucide-react"
 import { Button } from "../../shared/Button"
 
+/**
+ * Propriedades aceitas pelo componente Error.
+ * simulationId: Identificador da simulação atual.
+ * message: Mensagem descritiva do erro ocorrido.
+ * onRetry: Função de callback acionada para reexecutar a chamada.
+ */
 interface ErrorProps {
     simulationId: string
     message: string
     onRetry: () => void
 }
 
+/**
+ * Componente de fallback exibido quando ocorre uma falha no carregamento dos insights.
+ */
 export function Error({ simulationId, message, onRetry }: ErrorProps) {
     if (!simulationId || !message) {
         return null

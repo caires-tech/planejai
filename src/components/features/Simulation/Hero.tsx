@@ -1,5 +1,12 @@
+/**
+ * Componente de cabeçalho (Hero) da tela inicial do formulário de simulação.
+ * Exibe o título chamativo, a ilustração do cofrinho e a instrução inicial.
+ */
 import PiggyBankImage from '../../../assets/images/piggy-bank.png'
 
+/**
+ * Renderiza o bloco introdutório visual no topo da página de simulação.
+ */
 export function SimulationHero() {
     return (
         <div className="mb-8 text-center">

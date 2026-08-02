@@ -1,8 +1,15 @@
+/**
+ * Componente genérico de cabeçalho para páginas internas (ex: Histórico, Resultado).
+ * Exibe um título principal e um subtítulo descritivo com margens e estilos padronizados.
+ */
 interface PageHeroProps {
     title: string
     subtitle: string
 }
 
+/**
+ * Renderiza o cabeçalho textual reutilizável para páginas da aplicação.
+ */
 export function PageHero({ title, subtitle }: PageHeroProps) {
     return (
         <>

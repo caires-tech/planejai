@@ -1,7 +1,16 @@
+/**
+ * Módulo de utilitário para construção de prompts enviados à IA (LLM).
+ * Define a estrutura estrita de resposta em formato JSON (Schema) e formata os dados
+ * da simulação financeira do usuário em instruções detalhadas para o modelo de IA.
+ */
 import { parseCurrency } from "../utils/currency"
 import { calcMonthlySavings } from "../utils/simulation"
 import type { SimulationRecord } from "./simulation"
 
+/**
+ * Esquema JSON (JSON Schema) esperado no retorno da API do Gemini.
+ * Garante que a IA responda exatamente no formato consumido pela interface da aplicação.
+ */
 const RESPONSE_SCHEMA = `{
     "feasibility": {
         "status": "viable" | "needs_adjustment" | "unfeasible",
@@ -24,6 +33,13 @@ const RESPONSE_SCHEMA = `{
     }
 }`
 
+/**
+ * Constrói a mensagem/prompt do sistema combinando os dados calculados da simulação,
+ * diretrizes de tom de voz (Educador Financeiro) e as regras de formatação do retorno.
+ * 
+ * simulation: Registro contendo os dados do formulário de simulação.
+ * String: contendo o prompt formatado e pronto para envio à IA.
+ */
 export function buildAIPrompt(simulation: SimulationRecord) {
     const { income, expenses, debts, goalName, goalAmount, goalDeadline } = 
         simulation
@@ -31,7 +47,7 @@ export function buildAIPrompt(simulation: SimulationRecord) {
     const monthlySavings = calcMonthlySavings(simulation)
     const monthlySavingsNeeded = 
         parseCurrency(goalAmount) / parseInt(goalDeadline)
-
+    // Realiza o cálculo da economia mensal necessária e prepara o template de prompt com as regras de viabilidade
     return `Você é um educador financeiro especializado em finanças pessoais.
         Analise os dados abaixo e gere um diagnóstico financeiro personalizado com linguagem clara, didática e encorajadora,
         voltado para pessoas sem conhecimento financeiro. O diagnóstico será exibido diretamente ao usuário no app,

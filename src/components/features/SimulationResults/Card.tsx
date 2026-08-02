@@ -1,5 +1,17 @@
+/**
+ * Componente genérico e reutilizável de cartão para exibição de métricas e indicadores.
+ * Suporta diferentes variantes visuais (padrão e destaque) adaptadas aos temas da aplicação.
+ */
 import type { LucideIcon } from 'lucide-react'
 
+/**
+ * Propriedades aceitas pelo componente Card.
+ * icon: Ícone do Lucide a ser exibido no cabeçalho.
+ * label: Rótulo ou título da métrica.
+ * value: Valor principal em destaque (ex: "R$ 5.000,00").
+ * subtitle: Texto explicativo ou complementar.
+ * variant: Estilo visual do card ('default' ou 'primary').
+ */
 interface CardProps {
     icon: LucideIcon
     label: string
@@ -8,6 +20,9 @@ interface CardProps {
     variant?: 'default' | 'primary'
 }
 
+/**
+ * Mapeamento de classes de estilização dinâmicas baseadas na variante selecionada.
+ */
 const variantClasses = {
     default: {
         card: 'bg-card',
@@ -23,6 +38,9 @@ const variantClasses = {
     },
 }
 
+/**
+ * Renderiza um card contendo ícone, rótulo, valor principal e subtítulo estilizados.
+ */
 export function Card({
     icon: Icon,
     label,

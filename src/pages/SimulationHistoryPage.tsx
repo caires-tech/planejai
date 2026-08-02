@@ -1,17 +1,28 @@
+/**
+ * Página de histórico de simulações financeiras.
+ * Exibe a lista de simulações salvas localmente com suas métricas principais (custo, prazo, economia),
+ * além de permitir navegar para os detalhes de uma simulação ou excluí-la.
+ */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ExternalLink, Target, Trash2 } from 'lucide-react'
-
 import { Button } from '../components/shared/Button'
 import { PageHero } from '../components/shared/PageHero'
 import { useSimulationStorage } from '../hooks/useSimulationStorage'
 import { calcMonthlySavings } from '../utils/simulation'
 
+/**
+ * Renderiza a listagem de simulações armazenadas ou um estado vazio (empty state) caso não haja registros.
+ */
 export function SimulationHistoryPage() {
   const navigate = useNavigate()
+  // Recupera as simulações do LocalStorage e gerencia o estado da lista local
   const { getAllSimulations, deleteSimulation } = useSimulationStorage()
   const [simulations, setSimulations] = useState(getAllSimulations)
-
+  /**
+   * Remove uma simulação do armazenamento local e atualiza o estado para refletir a exclusão na interface.
+   * id: Identificador da simulação a ser excluída.
+   */
   const handleDelete = (id: string) => {
     const updatedList = deleteSimulation(id)
     setSimulations(updatedList)
@@ -43,6 +54,7 @@ export function SimulationHistoryPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
+          // Renderiza os cards de simulação calculando dinamicamente o valor formatado de economia mensal
           {simulations.map((item) => {
             const monthlySavings = calcMonthlySavings(item)
             const formattedSavings = monthlySavings.toLocaleString('pt-BR', {

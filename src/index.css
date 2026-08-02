@@ -1,10 +1,15 @@
+/* 
+ * Ponto de entrada global de estilos.
+ * Importa o Tailwind CSS, fontes externas (Inter), variáveis de tema e regras base globais.
+ */
 @import "tailwindcss";
+/* Fontes da família Inter com variações de peso (400, 600, 700, 800) */
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/600.css';
 @import '@fontsource/inter/700.css';
 @import '@fontsource/inter/800.css';
 @import './styles/theme.css';
-
+/* Estilos globais e transição suave para troca de temas (Light/Dark) */
 @layer base {
   body {
     @apply bg-background text-foreground;
@@ -14,7 +19,7 @@
     color 0.3s ease;
   }
 }
-
+/* Padronização da espessura dos traços dos ícones Lucide */
 .lucide {
   stroke-width: 1.5;
 }

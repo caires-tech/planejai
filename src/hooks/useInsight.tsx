@@ -1,20 +1,27 @@
+/**
+ * Custom hook responsável pela integração do frontend com o serviço de IA.
+ * Gerencia a busca do diagnóstico financeiro, controle de cache/persistência local,
+ * envio de mensagens no chat em tempo real e prevenção de memory leaks (component unmount).
+ */
 import { useCallback, useEffect, useRef, useState } from "react"
 import { getInsight, sendChatMessage, type InsightData } from "../services/aiService"
 import { buildAIPrompt } from "../data/aiPrompt"
 import { useSimulationStorage } from "./useSimulationStorage"
 import type { ChatMessage, SimulationRecord } from "../data/simulation"
 
+/**
+ * Gerencia todo o ciclo de vida dos insights e interações do chat por simulação.
+ * 
+ * id: Identificador único da simulação ativa.
+ * Objeto: contendo estados (insight, mensagens, loading, erros) e métodos (fetchInsight, sendMessage).
+ */
 export const useInsight = (id: string) => {
   const { getFormData, updateSimulation } = useSimulationStorage()
 
-  // Ref para verificar se o componente ainda está montado na tela
+  // Controle de concorrência e montagem de componente para evitar memory leaks
   const isMountedRef = useRef<boolean>(true)
-
-  // Trava rígida: armazena qual ID já teve tentativa de disparo nesta sessão
   const fetchedIdRef = useRef<string | null>(null)
   const isFetchingRef = useRef<boolean>(false)
-
-  // Inicializa o insight com o cache local se existir
   const [insight, setInsight] = useState<InsightData | null>(() => {
     if (!id) return null
     const simulation = getFormData(id)
@@ -33,6 +40,13 @@ export const useInsight = (id: string) => {
   const [error, setError] = useState<string | null>(null)
   const [chatError, setChatError] = useState<string | null>(null)
 
+  /**
+   * Executa a requisição para gerar o diagnóstico financeiro via IA.
+   * Valida se já existe cache salvo antes de efetuar chamadas externas.
+   * 
+   * simulationId: ID da simulação a ser processada.
+   * forceRetry: Se verdadeiro, ignora as travas de cache e força nova requisição.
+   */
   const fetchInsight = useCallback(
     async (simulationId: string, forceRetry = false) => {
       if (!simulationId) return
@@ -94,6 +108,11 @@ export const useInsight = (id: string) => {
     [getFormData, updateSimulation],
   )
 
+  /**
+   * Trata o envio de mensagens do usuário no chat e obtém a trégua/resposta da IA.
+   * Mantém o histórico sincronizado no estado local e no armazenamento contínuo.
+   * text: Texto da mensagem enviada pelo usuário.
+   */
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim() || isSendingMessage || !id) return
@@ -148,7 +167,7 @@ export const useInsight = (id: string) => {
     [getFormData, id, isSendingMessage, messages, updateSimulation],
   )
 
-  // 1. O useEffect deve reagir APENAS quando o 'id' mudar na URL
+  // Monitora mudanças na rota/ID para inicializar os dados ou buscar novos insights
   useEffect(() => {
     isMountedRef.current = true
 
@@ -167,9 +186,10 @@ export const useInsight = (id: string) => {
     return () => {
       isMountedRef.current = false
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]) // Dependência RÍGIDA APENAS em 'id'
-
+  }, [id])
+  /**
+   * Função utilitária exposta para re-tentar a busca de insights em caso de erro.
+   */
   const retryFetch = useCallback(() => {
     if (id) {
       void fetchInsight(id, true)
